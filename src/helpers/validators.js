@@ -13,6 +13,25 @@
  * Если какие либо функции написаны руками (без использования библиотек) это не является ошибкой
  */
 
+import { equals, prop } from "ramda";
+
+// геттеры фигур
+// или через propEq?
+const getSquare = prop('Square');
+const getStar = prop('Star');
+const getCircle = prop('Circle');
+const getTriangle = prop('Triangle');
+
+// цвета
+const isWhite = equals('White');
+const isBlue = equals("Blue");
+const isGreen = equals("Green");
+const isOrange = equals("Orange");
+const isRed = equals("Red");
+
+
+
+
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
 export const validateFieldN1 = ({star, square, triangle, circle}) => {
     if (triangle !== 'white' || circle !== 'white') {
@@ -23,7 +42,7 @@ export const validateFieldN1 = ({star, square, triangle, circle}) => {
 };
 
 // 2. Как минимум две фигуры зеленые.
-export const validateFieldN2 = () => false;
+export const validateFieldN2 = ({star, square, triangle, circle}) => false;
 
 // 3. Количество красных фигур равно кол-ву синих.
 export const validateFieldN3 = () => false;
