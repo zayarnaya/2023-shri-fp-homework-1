@@ -14,7 +14,8 @@
  * Иногда промисы от API будут приходить в состояние rejected, (прямо как и API в реальной жизни)
  * Ответ будет приходить в поле {result}
  */
- import Api from '../tools/api';
+ import { __, compose, gt, gte, lt, pipe, toString } from 'ramda';
+import Api from '../tools/api';
 
  const api = new Api();
 
@@ -25,10 +26,33 @@
      setTimeout(resolve, time);
  })
 
+ const regExp = /^\d*\.?\d*$/;
+
+ // приведение типов
+const numToString = (num) => toString(num);
+const stringToNum = (str) => Number(str.trim()); // тут бы еще ошибку отслеживать
+const countChars = (str) => str.length;
+const roundNum = (num) => Math.round(num);
+
+// считалки
+const lessThanTen = lt(__, 10);
+const greaterThanTwo = gt(__, 2);
+const greaterThanZero = gt(__, 0);
+const toSquare = (num) => num * num;
+const restFromDivByThree = (num) => num % 3;
+
+// валидашки
+ // количество символов в числе меньше 10
+ const qOfFiguresLessThanTen = pipe(countChars, lessThanTen);
+ // количество символов в числе больше 2
+ const qOfFiguresMoreThanTwo = pipe(countChars, greaterThanTwo);
+ // в числе цифры 0-9 и точка 
+ const isDecimal = (str) => test(regExp, str);
+ // число положительное
+ const isPositive = pipe(stringToNum, greaterThanZero);
+
  const processSequence = ({value, writeLog, handleSuccess, handleError}) => {
-     /**
-      * Я – пример, удали меня
-      */
+
      writeLog(value);
 
      api.get('https://api.tech/numbers/base', {from: 2, to: 10, number: '01011010101'}).then(({result}) => {
