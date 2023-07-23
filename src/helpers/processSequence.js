@@ -14,7 +14,7 @@
  * Иногда промисы от API будут приходить в состояние rejected, (прямо как и API в реальной жизни)
  * Ответ будет приходить в поле {result}
  */
- import { __, allPass, andThen, assoc, compose, concat, gt, gte, lt, otherwise, partial, pipe, tap, test, toString } from 'ramda';
+ import { __, allPass, andThen, assoc, compose, concat, gt, gte, ifElse, lt, otherwise, partial, pipe, prop, tap, test, toString } from 'ramda';
 import Api from '../tools/api';
 
  const api = new Api();
@@ -29,8 +29,8 @@ import Api from '../tools/api';
  const regExp = /^\d*\.?\d*$/;
 
  // приведение типов
-// const numToString = (num) => toString(num);
-const stringToNum = (str) => Number(str.trim()); // тут бы еще ошибку отслеживать
+// const numToString = (num) => toString(num); 
+// const stringToNum = (str) => Number(str.trim()); // тут бы еще ошибку отслеживать // и вообще не работает
 const countChars = (str) => str.length;
 const roundNum = (num) => Math.round(num);
 
@@ -54,77 +54,78 @@ const restFromDivByThree = (num) => num % 3;
  const isValid = allPass([qOfFiguresLessThanTen, qOfFiguresMoreThanTwo, isDecimal]);
 
  // промисы и then
+
  const getLengthFromResponse = andThen(countChars);
  const getRestFromDivByThree = andThen(restFromDivByThree);
  const getSquaredNum = andThen(toSquare);
- const getNumFromString = andThen(stringToNum);
+ const getNumFromString = andThen(Number);
 
 
  // API
  const NUMBERS = 'https://api.tech/numbers/base';
  const ANIMALS = 'https://animals.tech/';
  const NUMBER_PARAMS = {
-    from: 2, 
-    to: 10
+    from: 10, 
+    to: 2
 };
 
  const addParamForNumbers = assoc('number', __, NUMBER_PARAMS);
- const decToBin = pipe(addParamForNumbers, api.get(NUMBERS));
+ const decToBin = pipe(addParamForNumbers, api.get(NUMBERS, __));
 
- const addQueryParamsForAnimals = andThen(concat(ANIMALS));
+ const addQueryParamsForAnimals = pipe(andThen(String), andThen(concat(ANIMALS)));
+//  const addQueryParamsForAnimals = andThen(concat(ANIMALS));
  const getRandomAnimal = andThen(api.get(__, {}));
+
+ const responseToString = pipe(prop('result'), String); // интересно почему не работает с toString да и вовсе не нужно
+ const getResponse = andThen(prop('result'))
 
 
 
 
  const processSequence = ({value, writeLog, handleSuccess, handleError}) => {
+    console.log('считаем', countChars('111000110'))
     const writeToLog = tap(writeLog);
     const writeRespToLog = andThen(writeToLog);
     const onSuccess = andThen(handleSuccess);
     const onError = otherwise(handleError);
     const onValidationError = partial(handleError, ['ValidationError']);
 
-    const letsGo = pipe(
+    // композиции/трубы с writeLog
+    const action3 = pipe(Number, roundNum, toString, writeToLog);
+
+
+
+
+    const performMainTask = pipe(
         // убедиться, что все что надо идет через then
-        writeToLog,
-        isValid,
-        stringToNum,
-        roundNum,
-        writeToLog,
+        // writeToLog,
+        // isValid,
+        // stringToNum, // должен же value получить, да?
+        // roundNum,
+        // writeToLog,
+        action3, // со следующего уже идет then // это отрабатывает правильно
+
         decToBin, // передать результат как строку? result
-        writeRespToLog,
+        getResponse,
+        writeRespToLog, // по этот пункт работает, правда как-то не так
         getLengthFromResponse,
         writeRespToLog,
         getNumFromString,
         getSquaredNum,
-        writeRespToLog,
+        writeRespToLog, // досюда тож работает
         getRestFromDivByThree,
-        writeRespToLog,
+        writeRespToLog, // работает
         addQueryParamsForAnimals,
         getRandomAnimal,
+        getResponse,
         onSuccess,
         onError
     );
+    const checkInitialInput = ifElse(isValid, performMainTask, onValidationError);
+    const letsGo = pipe(writeToLog, checkInitialInput);
 
-     writeLog(value);
+    letsGo(value);
 
-     
-
-     api.get('https://api.tech/numbers/base', {from: 2, to: 10, number: '01011010101'}).then(({result}) => {
-         writeLog(result);
-     });
-
-     wait(2500).then(() => {
-         writeLog('SecondLog')
-
-         return wait(1500);
-     }).then(() => {
-         writeLog('ThirdLog');
-
-         return wait(400);
-     }).then(() => {
-         handleSuccess('Done');
-     });
  }
 
 export default processSequence;
