@@ -82,7 +82,7 @@ const greenTriangle = compose(isGreen, getTriangle);
 
 const checkIfAllAreGreen = compose(allAreSameColor, countGreen);
 const checkIfAllAreOrange = compose(allAreSameColor, countOrange);
-const checkUfTwoAreGreen = compose(exactlyTwoOutOfFour, countGreen);
+const checkIfTwoAreGreen = compose(exactlyTwoOutOfFour, countGreen);
 const checkIfTwoOrMoreAreGreen = compose(atLeastTwoOutOfFour, countGreen);
 const checkIfTwoAreWhite = compose(exactlyTwoOutOfFour, countWhite);
 const checkIfOneIsRed = compose(exactlyOne, countRed);
@@ -104,7 +104,7 @@ export const validateFieldN1 = allPass([
 export const validateFieldN2 = checkIfTwoOrMoreAreGreen;
 
 // 3. Количество красных фигур равно кол-ву синих.
-export const validateFieldN3 = checkIfBluesEqualsRed; // так работает но надо упростить
+export const validateFieldN3 = checkIfBluesEqualsRed; 
 
 // 4. Синий круг, красная звезда, оранжевый квадрат треугольник любого цвета
 export const validateFieldN4 = allPass([blueCircle, orangeSquare, redStar]);
@@ -114,7 +114,7 @@ export const validateFieldN5 = checkIfThreeOrMoreAreNonWhite;
 
 // 6. Ровно две зеленые фигуры (одна из зелёных – это треугольник), плюс одна красная. Четвёртая оставшаяся любого доступного цвета, но не нарушающая первые два условия
 export const validateFieldN6 = allPass([
-  checkUfTwoAreGreen,
+  checkIfTwoAreGreen,
   greenTriangle,
   checkIfOneIsRed,
 ]);
