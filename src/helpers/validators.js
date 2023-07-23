@@ -13,7 +13,7 @@
  * Если какие либо функции написаны руками (без использования библиотек) это не является ошибкой
  */
 
-import { __, allPass, any, compose, count, dissoc, equals, gte, not, prop, values } from "ramda";
+import { __, allPass, any, compose, converge, count, countBy, dissoc, equals, gte, identity, not, prop, values } from "ramda";
 
 // геттеры фигур
 // или через propEq?
@@ -28,18 +28,20 @@ const isBlue = equals("blue");
 const isGreen = equals("green");
 const isOrange = equals("orange");
 const isRed = equals("red");
+// const getAllColorsList = function() {
+//     return Object.values(arguments[0])
+// }
+const getAllColorsQuantity = compose(countBy(identity), values);
 
-const getAllColorsList = function() {
-    return Object.values(arguments[0])
-}
-const getAllColorsQuantity = function() {
-    const res = {}
-    for (let i of Object.values(arguments[0])) {
-        if (!res[i]) res[i] = 0;
-        res[i]++;
-    }
-    return res;
-}
+
+// const getAllColorsQuantity = function() {
+//     const res = {}
+//     for (let i of Object.values(arguments[0])) {
+//         if (!res[i]) res[i] = 0;
+//         res[i]++;
+//     }
+//     return res;
+// }
 
 
 
@@ -65,12 +67,13 @@ const exactlyOne = equals(__, 1);
 const allAreSameColor = equals(__, 4);
 
 
-const countByColor = (color) => compose(count(a => a === color), getAllColorsList);
+const countByColor = (color) => compose(count(a => a === color), values);
 
 const countGreen = countByColor('green'); 
 const countOrange = countByColor('orange');
 const countWhite = countByColor('white');
 const countRed = countByColor('red');
+const countBlue = countByColor('blue');
 const countNonWhite = compose(omitWhite, getAllColorsQuantity);
 
 
@@ -90,10 +93,10 @@ const checkUfTwoAreGreen = compose(exactlyTwoOutOfFour, countGreen);
 const checkIfTwoOrMoreAreGreen = compose(atLeastTwoOutOfFour, countGreen);
 const checkIfTwoAreWhite = compose(exactlyTwoOutOfFour, countWhite);
 const checkIfOneIsRed = compose(exactlyOne, countRed);
-const checkIfBluesEqualsRed = ({red, blue}) => equals(red, blue);
+const checkIfBluesEqualsRed = converge(equals, [countRed, countBlue]);
 const checkIfThreeOrMoreAreNonWhite = compose(any(atLeastThreeOutOfFour), values, countNonWhite);
 const checkIfStarNonWhiteNorRed = allPass([nonRedStar, nonWhiteStar]);
-const checkIfTriangleAndSquareAreSameColor = ({triangle, square}) => equals(triangle, square);
+const sameTriangleAndSquare = converge(equals, [getTriangle, getSquare]);
 
 
 export const validateFieldN1 = allPass([checkIfTwoAreWhite, redStar, greenSquare]);
@@ -101,7 +104,7 @@ export const validateFieldN1 = allPass([checkIfTwoAreWhite, redStar, greenSquare
 export const validateFieldN2 = checkIfTwoOrMoreAreGreen;
 
 // 3. Количество красных фигур равно кол-ву синих.
-export const validateFieldN3 = compose(checkIfBluesEqualsRed, getAllColorsQuantity); // так работает но надо упростить
+export const validateFieldN3 = checkIfBluesEqualsRed; // так работает но надо упростить
 
 // 4. Синий круг, красная звезда, оранжевый квадрат треугольник любого цвета
 export const validateFieldN4 = allPass([blueCircle, orangeSquare, redStar]);
@@ -122,4 +125,4 @@ export const validateFieldN8 = checkIfStarNonWhiteNorRed;
 export const validateFieldN9 = checkIfAllAreGreen; // ну надо же работает
 
 // 10. Треугольник и квадрат одного цвета (не белого), остальные – любого цвета
-export const validateFieldN10 = allPass([nonWhiteTriange, nonWhiteSquare, checkIfTriangleAndSquareAreSameColor]);
+export const validateFieldN10 = allPass([nonWhiteTriange, nonWhiteSquare, sameTriangleAndSquare]);
