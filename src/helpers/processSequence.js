@@ -92,6 +92,11 @@ const restFromDivByThree = (num) => num % 3;
 
     // композиции/трубы с writeLog
     const action3 = pipe(Number, roundNum, toString, writeToLog);
+    const action4 = pipe(decToBin, getResponse, writeRespToLog);
+    const action5 = pipe(getLengthFromResponse, writeRespToLog);
+    const action6 = pipe(getNumFromString, getSquaredNum, writeRespToLog);
+    const action7 = pipe(getRestFromDivByThree, writeRespToLog);
+    const action8 = pipe(addQueryParamsForAnimals, getRandomAnimal, getResponse);
 
 
 
@@ -104,20 +109,24 @@ const restFromDivByThree = (num) => num % 3;
         // roundNum,
         // writeToLog,
         action3, // со следующего уже идет then // это отрабатывает правильно
-
-        decToBin, // передать результат как строку? result
-        getResponse,
-        writeRespToLog, // по этот пункт работает, правда как-то не так
-        getLengthFromResponse,
-        writeRespToLog,
-        getNumFromString,
-        getSquaredNum,
-        writeRespToLog, // досюда тож работает
-        getRestFromDivByThree,
-        writeRespToLog, // работает
-        addQueryParamsForAnimals,
-        getRandomAnimal,
-        getResponse,
+        action4,
+        action5,
+        action6,
+        action7,
+        action8,
+        // decToBin, // передать результат как строку? result
+        // getResponse,
+        // writeRespToLog, // по этот пункт работает, правда как-то не так
+        // getLengthFromResponse,
+        // writeRespToLog,
+        // getNumFromString,
+        // getSquaredNum,
+        // writeRespToLog, // досюда тож работает
+        // getRestFromDivByThree,
+        // writeRespToLog, // работает
+        // addQueryParamsForAnimals,
+        // getRandomAnimal,
+        // getResponse,
         onSuccess,
         onError
     );
